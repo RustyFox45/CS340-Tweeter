@@ -1,7 +1,6 @@
 import "./UserInfoComponent.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { AuthToken, FakeData, User } from "tweeter-shared";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo, useUserInfoActions } from "./UserInfoHooks";
 import { UserInfoPresenter, UserInfoView } from "../../presenter/UserInfoPresenter";
@@ -24,9 +23,9 @@ const UserInfo = () => {
   }
 
   useEffect(() => {
-    presenter.setIsFollowerStatus(authToken!, currentUser!, displayedUser!);
-    presenter.setNumbFollowees(authToken!, displayedUser!);
-    presenter.setNumbFollowers(authToken!, displayedUser!);
+    presenterRef.current?.setIsFollowerStatus(authToken!, currentUser!, displayedUser!);
+    presenterRef.current?.setNumbFollowees(authToken!, displayedUser!);
+    presenterRef.current?.setNumbFollowers(authToken!, displayedUser!);
   }, [displayedUser]);
 
   const switchToLoggedInUser = (event: React.MouseEvent): void => {
@@ -44,14 +43,14 @@ const UserInfo = () => {
     event: React.MouseEvent
   ): Promise<void> => {
     event.preventDefault();
-    await presenter.followDisplayedUser(authToken!, displayedUser!);
+    await presenterRef.current?.followDisplayedUser(authToken!, displayedUser!);
   };
 
   const unfollowDisplayedUser = async (
     event: React.MouseEvent
   ): Promise<void> => {
     event.preventDefault();
-    await presenter.unfollowDisplayedUser(authToken!, displayedUser!);
+    await presenterRef.current?.unfollowDisplayedUser(authToken!, displayedUser!);
   };
 
   const listener: UserInfoView = {
@@ -64,7 +63,10 @@ const UserInfo = () => {
     clearLastInfoMessage: deleteMessage,
   };
 
-  const presenter = new UserInfoPresenter(listener);
+  const presenterRef = useRef<UserInfoPresenter | null>(null)
+  if (!presenterRef.current) {
+    presenterRef.current = new UserInfoPresenter(listener);
+  }
 
   return (
     <>

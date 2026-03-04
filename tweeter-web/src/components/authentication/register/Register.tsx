@@ -1,6 +1,6 @@
 import "./Register.css";
 import "bootstrap/dist/css/bootstrap.css";
-import { ChangeEvent, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
 import { AuthToken, FakeData, User } from "tweeter-shared";
@@ -47,7 +47,7 @@ const Register = () => {
 
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    presenter.handleImageFile(file);
+    presenterRef.current?.handleImageFile(file);
   };
 
   const listener: RegisterView = {
@@ -61,10 +61,13 @@ const Register = () => {
     setImageUrl: setImageUrl,
   };
 
-  const presenter = new RegisterPresenter(listener);
+  const presenterRef = useRef<RegisterPresenter | null>(null)
+  if (!presenterRef.current) {
+    presenterRef.current = new RegisterPresenter(listener);
+  }
 
   const doRegister = async () => {
-    presenter.doRegister(
+    presenterRef.current?.doRegister(
       firstName,
       lastName,
       alias,

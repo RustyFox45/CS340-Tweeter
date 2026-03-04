@@ -5,6 +5,7 @@ import {
   NavigationPresenter,
   NavigationView,
 } from "../../presenter/NavigationPresenter";
+import { useRef } from "react";
 
 export const useUserNavigation = () => {
   const { displayErrorMessage } = useMessageActions();
@@ -18,14 +19,21 @@ export const useUserNavigation = () => {
     setDisplayedUser: setDisplayedUser,
   };
 
-  const presenter = new NavigationPresenter(
-    listener,
-    navigate,
-    location.pathname,
-  );
+  const presenterRef = useRef<NavigationPresenter | null>(null);
+  if (!presenterRef.current) {
+    presenterRef.current = new NavigationPresenter(
+      listener,
+      navigate,
+      location.pathname,
+    );
+  }
 
   const navigateToUser = async (event: React.MouseEvent): Promise<void> => {
-    await presenter.navigateToUser(authToken!, displayedUser!, event);
+    await presenterRef.current?.navigateToUser(
+      authToken!,
+      displayedUser!,
+      event,
+    );
   };
 
   return navigateToUser;

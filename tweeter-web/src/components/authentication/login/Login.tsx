@@ -1,6 +1,6 @@
 import "./Login.css";
 import "bootstrap/dist/css/bootstrap.css";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
 import { AuthToken, FakeData, User } from "tweeter-shared";
@@ -44,10 +44,13 @@ const Login = (props: Props) => {
     },
   };
 
-  const presenter = new LoginPresenter(listener);
+  const presenterRef = useRef<LoginPresenter | null>(null)
+  if (!presenterRef.current) {
+    presenterRef.current = new LoginPresenter(listener);
+  }
 
   const doLogin = async () => {
-    presenter.doLogin(alias, password);
+    await presenterRef.current?.doLogin(alias, password);
   };
 
   const inputFieldFactory = () => {

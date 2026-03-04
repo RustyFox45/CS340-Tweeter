@@ -1,5 +1,5 @@
 import "./PostStatus.css";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo } from "../userInfo/UserInfoHooks";
 import {
@@ -22,11 +22,14 @@ const PostStatus = () => {
     displayInfoMessage: (message: string, duration: number) => displayInfoMessage(message, duration),
   };
 
-  const presenter = new PostStatusPresenter(listener);
+  const presenterRef = useRef<PostStatusPresenter | null>(null)
+  if (!presenterRef.current) {
+    presenterRef.current = new PostStatusPresenter(listener);
+  }
 
   const submitPost = async (event: React.MouseEvent) => {
     event.preventDefault();
-    await presenter.submitPost(authToken!, post, currentUser!);
+    await presenterRef.current?.submitPost(authToken!, post, currentUser!);
   };
 
   const clearPost = (event: React.MouseEvent) => {
