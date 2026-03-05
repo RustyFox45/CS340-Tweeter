@@ -1,14 +1,13 @@
 import React from "react";
 import { AuthToken, User } from "tweeter-shared";
 import { UserService } from "../model.service/UserService";
+import { Presenter, View } from "./Presenter";
 
-export interface NavigationView {
-  displayErrorMessage: (message: string) => void;
+export interface NavigationView extends View {
   setDisplayedUser: (user: User) => void;
 }
 
-export class NavigationPresenter {
-  private view: NavigationView;
+export class NavigationPresenter extends Presenter<NavigationView> {
   private userService: UserService;
   private navigate: (path: string) => void;
   private currentPath: string;
@@ -18,7 +17,7 @@ export class NavigationPresenter {
     navigate: (path: string) => void,
     currentPath: string,
   ) {
-    this.view = view;
+    super(view);
     this.userService = new UserService();
     this.navigate = navigate;
     this.currentPath = currentPath;
@@ -31,7 +30,7 @@ export class NavigationPresenter {
   ) {
     event.preventDefault();
 
-    try {
+    await this.doFailureReportingOperation(async () => {
       const alias = this.extractAlias(event.target.toString());
 
       const user = await this.userService.getUser(authToken!, alias);
@@ -46,11 +45,7 @@ export class NavigationPresenter {
         const pathPrefix = this.currentPath.split("/")[1];
         this.navigate(`/${pathPrefix}/${user.alias}`);
       }
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to get user because of exception: ${error}`,
-      );
-    }
+    }, "get user");
   }
 
   public extractAlias(value: string): string {

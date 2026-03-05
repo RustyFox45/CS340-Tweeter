@@ -1,25 +1,18 @@
 import { Buffer } from "buffer";
-import { ChangeEvent } from "react";
-import { AuthToken, User } from "tweeter-shared";
-import { UserService } from "../model.service/UserService";
+import {
+  AuthenticatePresenter,
+  AuthenticationView,
+} from "./AuthenticatePresenter";
 
-export interface RegisterView {
-  displayErrorMessage: (message: string) => void;
-  setIsLoading: (isLoading: boolean) => void;
-  updateUserInfo: (user: User, authToken: AuthToken) => void;
-  navigate: (to: string) => void;
+export interface RegisterView extends AuthenticationView {
   setImageBytes: (bytes: Uint8Array) => void;
   setImageFileExtension: (fileExtension: string) => void;
   setImageUrl: (imageUrl: string) => void;
 }
 
-export class RegisterPresenter {
-  private view: RegisterView;
-  private userService: UserService;
-
+export class RegisterPresenter extends AuthenticatePresenter<RegisterView> {
   public constructor(view: RegisterView) {
-    this.view = view;
-    this.userService = new UserService();
+    super(view);
   }
 
   public async doRegister(
@@ -30,26 +23,19 @@ export class RegisterPresenter {
     imageBytes: Uint8Array,
     imageFileExtension: string,
   ) {
-    try {
-      this.view.setIsLoading(true);
-
-      const [user, authToken] = await this.userService.register(
-        firstName,
-        lastName,
-        alias,
-        password,
-        imageBytes,
-        imageFileExtension,
-      );
-
-      this.view.updateUserInfo(user, authToken);
-    } catch (error) {
-      this.view.displayErrorMessage(
-        `Failed to register user because of exception: ${error}`,
-      );
-    } finally {
-      this.view.setIsLoading(false);
-    }
+    await this.doAuthenticationOperation(
+      async () =>
+        this.userService.register(
+          firstName,
+          lastName,
+          alias,
+          password,
+          imageBytes,
+          imageFileExtension,
+        ),
+      (user) => `/feed/${user.alias}`,
+      "register user"
+    );
   }
 
   public async handleImageFile(file: File | undefined) {

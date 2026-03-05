@@ -60,7 +60,7 @@ const UserInfo = () => {
     setIsLoading: setIsLoading,
     displayErrorMessage: displayErrorMessage,
     displayInfoMessage: displayInfoMessage,
-    clearLastInfoMessage: deleteMessage,
+    deleteMessage: deleteMessage,
   };
 
   const presenterRef = useRef<UserInfoPresenter | null>(null)

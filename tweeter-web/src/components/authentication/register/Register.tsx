@@ -3,8 +3,7 @@ import "bootstrap/dist/css/bootstrap.css";
 import { ChangeEvent, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
-import { AuthToken, FakeData, User } from "tweeter-shared";
-import { Buffer } from "buffer";
+import { AuthToken, User } from "tweeter-shared";
 import AuthenticationFields from "../AuthenticationFields";
 import { useMessageActions } from "../../toaster/MessageHooks";
 import { useUserInfoActions } from "../../userInfo/UserInfoHooks";
@@ -52,9 +51,8 @@ const Register = () => {
 
   const listener: RegisterView = {
     displayErrorMessage: displayErrorMessage,
-    setIsLoading: setIsLoading,
-    updateUserInfo: (user: User, authToken: AuthToken) => 
-      updateUserInfo(user, user, authToken, rememberMe),
+    // setLoadingState: setIsLoading,
+    authenticated: (user: User, authToken: AuthToken) => updateUserInfo(user, user, authToken, rememberMe),
     navigate: navigate,
     setImageBytes: setImageBytes,
     setImageFileExtension: setImageFileExtension,

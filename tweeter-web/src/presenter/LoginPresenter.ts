@@ -3,23 +3,16 @@ import {
   AuthenticationView,
 } from "./AuthenticatePresenter";
 
-export class LoginPresenter extends AuthenticatePresenter {
+export class LoginPresenter extends AuthenticatePresenter<AuthenticationView> {
   public constructor(view: AuthenticationView) {
     super(view);
   }
 
-  public async doLogin(alias: string, password: string) {
-    this.setLoadingState(true);
-
-    try {
-      const [user, authToken] = await this.userService.login(alias, password);
-      this.authenticated(user, authToken);
-    } catch (error) {
-      this.displayErrorMessage(
-        `Failed to login user because of exception: ${error}`,
-      );
-    } finally {
-      this.setLoadingState(false);
-    }
+  public async doLogin(alias: string, password: string, originalUrl?: string) {
+    await this.doAuthenticationOperation(
+      async () => this.userService.login(alias, password),
+      (user) => originalUrl ? originalUrl : `/feed/${user.alias}`,
+      "login user"
+    );
   }
 }

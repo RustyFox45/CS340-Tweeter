@@ -1,33 +1,33 @@
-import { Status } from "tweeter-shared";
 import { useState, useEffect, useRef } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useParams } from "react-router-dom";
-import StatusItem from "../statusItem/StatusItem";
 import { useMessageActions } from "../toaster/MessageHooks";
 import { useUserInfo, useUserInfoActions } from "../userInfo/UserInfoHooks";
-import { StatusItemPresenter, StatusItemView } from "../../presenter/StatusItemPresenter";
+import { PagedItemView, PagedItemPresenter } from "../../presenter/PagedItemPresenter";
+import { Service } from "../../model.service/Service";
 
 export const PAGE_SIZE = 10;
 
-interface Props {
+interface Props<T> {
     featurePath: string;
-    presenterFactory: (listener: StatusItemView) => StatusItemPresenter;
+    presenterFactory: (listener: PagedItemView<T>) => PagedItemPresenter<T, Service>;
+    itemComponentFactory: (item: T, featurePath: string, index: number) => JSX.Element;
 }
 
-const StatusItemScroller = (props: Props) => {
-    const { displayErrorMessage } = useMessageActions();
-  const [items, setItems] = useState<Status[]>([]);
+const ItemScroller = <T,>(props: Props<T>) => {
+  const { displayErrorMessage } = useMessageActions();
+  const [items, setItems] = useState<T[]>([]);
 
   const { displayedUser, authToken } = useUserInfo();
   const { setDisplayedUser } = useUserInfoActions();
   const { displayedUser: displayedUserAliasParam } = useParams();
 
-  const listener: StatusItemView = {
-    addItems: (newItems: Status[]) => 
+  const listener: PagedItemView<T> = {
+    addItems: (newItems: T[]) =>
       setItems((previousItems) => [...previousItems, ...newItems]),
     displayErrorMessage: displayErrorMessage
   };
-  const presenterRef = useRef<StatusItemPresenter | null>(null);
+  const presenterRef = useRef<PagedItemPresenter<T, Service> | null>(null);
   if (!presenterRef.current) {
     presenterRef.current = props.presenterFactory(listener);
   }
@@ -76,12 +76,12 @@ const StatusItemScroller = (props: Props) => {
             key={index}
             className="row mb-3 mx-0 px-0 border rounded bg-white"
           >
-            <StatusItem user={item.user} status={item} featurePath={props.featurePath} />
+            {props.itemComponentFactory(item, props.featurePath, index)}
           </div>
         ))}
       </InfiniteScroll>
     </div>
   );
-}
+};
 
-export default StatusItemScroller;
+export default ItemScroller;

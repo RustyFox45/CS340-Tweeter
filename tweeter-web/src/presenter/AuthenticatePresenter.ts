@@ -1,18 +1,19 @@
 import { UserService } from "../model.service/UserService";
 import { AuthToken, User } from "tweeter-shared";
+import { Presenter, View } from "./Presenter";
 
-export interface AuthenticationView {
+export interface AuthenticationView extends View {
   authenticated: (user: User, authToken: AuthToken) => void;
-  displayErrorMessage: (message: string) => void;
-  setLoadingState: (isLoading: boolean) => void;
+  navigate: (to: string) => void;
 }
 
-export class AuthenticatePresenter {
+export abstract class AuthenticatePresenter<
+  V extends AuthenticationView,
+> extends Presenter<V> {
   protected userService: UserService;
-  private view: AuthenticationView;
 
-  constructor(view: AuthenticationView) {
-    this.view = view;
+  constructor(view: V) {
+    super(view);
     this.userService = new UserService();
   }
 
@@ -24,7 +25,19 @@ export class AuthenticatePresenter {
     this.view.displayErrorMessage(message);
   }
 
-  protected setLoadingState(state: boolean) {
-    this.view.setLoadingState(state);
+  protected async doAuthenticationOperation(
+    authenticationOperation: () => Promise<[User, AuthToken]>,
+    navigationPath: (user: User) => string,
+    operationDescription: string,
+  ) {
+    try {
+      const [user, authToken] = await authenticationOperation();
+      this.authenticated(user, authToken);
+      this.view.navigate(navigationPath(user));
+    } catch (error) {
+      this.displayErrorMessage(
+        `Failed to ${operationDescription} because of exception: ${error}`,
+      );
+    }
   }
 }

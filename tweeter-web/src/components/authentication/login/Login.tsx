@@ -30,18 +30,16 @@ const Login = (props: Props) => {
   const listener = {
     authenticated: (user: User, authToken: AuthToken) => {
       updateUserInfo(user, user, authToken, rememberMe);
-      if (props.originalUrl) {
-        navigate(props.originalUrl);
-      } else {
-        navigate(`/`);
-      }
+    },
+    navigate: (to: string) => {
+      navigate(to);
     },
     displayErrorMessage: (message: string) => {
       displayErrorMessage(message);
     },
-    setLoadingState: (isLoading: boolean) => {
-      setIsLoading(isLoading);
-    },
+    // setLoadingState: (isLoading: boolean) => {
+    //   setIsLoading(isLoading);
+    // },
   };
 
   const presenterRef = useRef<LoginPresenter | null>(null)
