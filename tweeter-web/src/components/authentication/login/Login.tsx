@@ -3,7 +3,7 @@ import "bootstrap/dist/css/bootstrap.css";
 import { useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import AuthenticationFormLayout from "../AuthenticationFormLayout";
-import { AuthToken, FakeData, User } from "tweeter-shared";
+import { AuthToken, User } from "tweeter-shared";
 import AuthenticationFields from "../../authentication/AuthenticationFields";
 import { useMessageActions } from "../../toaster/MessageHooks";
 import { useUserInfoActions } from "../../userInfo/UserInfoHooks";
@@ -11,9 +11,10 @@ import { LoginPresenter } from "../../../presenter/LoginPresenter";
 
 interface Props {
   originalUrl?: string;
+  presenter?: LoginPresenter;
 }
 
-const Login = (props: Props) => {
+export const Login = (props: Props) => {
   const [alias, setAlias] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -44,11 +45,11 @@ const Login = (props: Props) => {
 
   const presenterRef = useRef<LoginPresenter | null>(null)
   if (!presenterRef.current) {
-    presenterRef.current = new LoginPresenter(listener);
+    presenterRef.current = props.presenter ?? new LoginPresenter(listener);
   }
 
   const doLogin = async () => {
-    await presenterRef.current?.doLogin(alias, password);
+    await presenterRef.current?.doLogin(alias, password, props.originalUrl);
   };
 
   const inputFieldFactory = () => {

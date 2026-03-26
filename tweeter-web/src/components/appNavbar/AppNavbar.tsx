@@ -19,6 +19,7 @@ const AppNavbar = () => {
     displayErrorMessage: displayErrorMessage,
     clearUserInfo: clearUserInfo,
     deleteMessage: deleteMessage,
+    navigateToLogin: () => navigate("/login"),
   };
 
   const presenterRef = useRef<LogoutPresenter | null>(null)
