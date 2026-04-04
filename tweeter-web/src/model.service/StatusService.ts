@@ -1,15 +1,35 @@
-import { AuthToken, FakeData, Status } from "tweeter-shared";
+import {
+  AuthToken,
+  Status,
+  LoadMoreItemsRequest,
+  PostStatusRequest,
+} from "tweeter-shared";
+import { ServerFacade } from "../network/ServerFacade";
 import { Service } from "./Service";
 
 export class StatusService implements Service {
+  private serverFacade: ServerFacade;
+
+  public constructor() {
+    this.serverFacade = new ServerFacade();
+  }
   public async loadMoreStoryItems(
     authToken: AuthToken,
     userAlias: string,
     pageSize: number,
     lastItem: Status | null,
   ): Promise<[Status[], boolean]> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
+    let request: LoadMoreItemsRequest = {
+      token: authToken.token,
+      userAlias: userAlias,
+      pageSize: pageSize,
+      lastItem: lastItem ? lastItem.dto : null,
+    };
+
+    const [statusesDtos, hasMorePages] =
+      await this.serverFacade.loadMoreStoryItems(request);
+    let statuses = Status.toStatusArray(statusesDtos);
+    return [statuses, hasMorePages];
   }
 
   public async loadMoreFeedItems(
@@ -18,8 +38,23 @@ export class StatusService implements Service {
     pageSize: number,
     lastItem: Status | null,
   ): Promise<[Status[], boolean]> {
-    // TODO: Replace with the result of calling server
-    return FakeData.instance.getPageOfStatuses(lastItem, pageSize);
+    let request: LoadMoreItemsRequest = {
+      token: authToken.token,
+      userAlias: userAlias,
+      pageSize: pageSize,
+      lastItem: lastItem ? lastItem.dto : null,
+    };
+
+    const [statusesDtos, hasMorePages] =
+      await this.serverFacade.loadMoreFeedItems(request);
+    let statuses = Status.toStatusArray(statusesDtos);
+    return [statuses, hasMorePages];
+    // const [statuses, hasMore] = FakeData.instance.getPageOfStatuses(
+    //   lastItem,
+    //   pageSize
+    // );
+    // console.log("This is the value of hasMore", hasMore);
+    // return [statuses, hasMore];
   }
 
   public async postStatus(
@@ -27,8 +62,11 @@ export class StatusService implements Service {
     newStatus: Status,
   ): Promise<void> {
     // Pause so we can see the logging out message. Remove when connected to the server
-    await new Promise((f) => setTimeout(f, 2000));
-
-    // TODO: Call the server to post the status
+    const request: PostStatusRequest = {
+      token: authToken.token,
+      userAlias: "NotARealAlias, Don't need One",
+      status: newStatus.dto,
+    };
+    await this.serverFacade.postStatus(request);
   }
 }

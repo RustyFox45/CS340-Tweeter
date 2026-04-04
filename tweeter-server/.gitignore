@@ -1,0 +1,7 @@
+/node_modules
+/dist
+/nodejs
+/layer
+.env
+nodejs.zip
+dist.zip
