@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Transform: AWS::Serverless-2016-10-31
-Description: SAM config for Tweeter server
+Description: SAM config for Tweeter server - v2
 
 #
 # Global Lambda function properties. These apply to every Lambda function.
@@ -331,7 +331,7 @@ Resources:
       ##### TODO: Change "userGetFunction" to the actual function name.
       FunctionName: userGetFunction
       ##### TODO: Modify Handler property to match your code. This identifies the exact function that the lambda should run.
-      Handler: handlers/users/UserGetHandler.userGetHandler
+      Handler: lambda/user/GetUserLambda.handler
       Policies: *commonPolicies
       Events:
         PostApi:

@@ -9,10 +9,16 @@ export const handler = async (
     request.userAlias,
   );
   if (userDto) {
+    return {
+      success: true,
+      message: "User retrieved successfully",
+      user: userDto,
+    };
+  } else {
+    return {
+      success: false,
+      message: "User not found",
+      user: null,
+    };
   }
-  return {
-    success: true,
-    message: null,
-    user: userDto!,
-  };
 };
