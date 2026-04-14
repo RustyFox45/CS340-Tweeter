@@ -63,10 +63,9 @@ export class UserInfoPresenter extends Presenter<UserInfoView> {
       this.view.setIsLoading(true);
       this.view.displayInfoMessage(`${messagePrefix} ${user.name}...`, 2000);
 
-      let [followerCount, followeeCount] = await this.followService.follow(
-        authToken!,
-        user!,
-      );
+      let [followerCount, followeeCount] = isFollower
+        ? await this.followService.follow(authToken!, user!)
+        : await this.followService.unfollow(authToken!, user!);
       this.view.setIsFollower(isFollower);
       this.view.setFollowerCount(followerCount);
       this.view.setFolloweeCount(followeeCount);

@@ -2,6 +2,7 @@
 /dist
 /nodejs
 /layer
+/.aws-sam
 .env
 nodejs.zip
 dist.zip

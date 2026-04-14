@@ -13,6 +13,14 @@ Globals:
       - !Ref tweeterLayer
     Timeout: 30
     MemorySize: 128
+    Environment:
+      Variables:
+        USERS_TABLE_NAME: tweeter-users
+        AUTH_TOKENS_TABLE_NAME: tweeter-auth-tokens
+        STORY_TABLE_NAME: tweeter-story
+        FOLLOWERS_TABLE_NAME: tweeter-followers
+        FEED_TABLE_NAME: tweeter-feed
+        S3_BUCKET_NAME: logan-lawson-tweeter-11
 
 #
 # Reusable blocks of configuration. These are referenced throughout the template to avoid duplication.
@@ -313,7 +321,7 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: tweeterLayer
-      Description: dependencies layer for Tweeter server
+      Description: dependencies layer for Tweeter server v7
       ContentUri: ./layer/
       CompatibleRuntimes:
         - nodejs20.x
@@ -347,7 +355,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       FunctionName: userCreateFunction ##### TODO: Set function name
-      Handler: handlers/users/UserCreateHandler.userCreateHandler ##### TODO: Set Handler
+      Handler: lambda/user/RegisterLambda.handler
       Policies: *commonPolicies
       Events:
         PostApi:

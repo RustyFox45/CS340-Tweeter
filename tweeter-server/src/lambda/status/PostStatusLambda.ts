@@ -1,16 +1,21 @@
-import { PostStatusRequest, Status, TweeterResponse } from "tweeter-shared";
+import { PostStatusRequest, TweeterResponse } from "tweeter-shared";
 import { StatusService } from "../../model/service/StatusService";
 export const handler = async (
   request: PostStatusRequest,
 ): Promise<TweeterResponse> => {
-  const statusService = new StatusService();
-  await statusService.postStatus(
-    request.token,
-    Status.fromDto(request.status)!,
-  );
+  try {
+    const statusService = new StatusService();
+    await statusService.postStatus(request.token, request.status);
 
-  return {
-    success: true,
-    message: null,
-  };
+    return {
+      success: true,
+      message: null,
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      success: false,
+      message: (error as Error).message,
+    };
+  }
 };

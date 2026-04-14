@@ -12,12 +12,18 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.1029.0",
+    "@aws-sdk/client-s3": "^3.1029.0",
+    "@aws-sdk/lib-dynamodb": "^3.1029.0",
+    "@aws-sdk/util-dynamodb": "^3.996.2",
+    "@types/bcryptjs": "^2.4.6",
+    "bcryptjs": "^3.0.3",
     "date-fns": "^3.6.0",
     "tweeter-shared": "file:../tweeter-shared",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
+    "@types/node": "^20.19.39",
     "typescript": "^5.0.0"
   }
 }

@@ -23,6 +23,10 @@ export class NavigationPresenter extends Presenter<NavigationView> {
     this.currentPath = currentPath;
   }
 
+  public setCurrentPath(path: string) {
+    this.currentPath = path;
+  }
+
   public async navigateToUser(
     authToken: AuthToken,
     currentUser: User,

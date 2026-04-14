@@ -29,6 +29,7 @@ export const useUserNavigation = () => {
   }
 
   const navigateToUser = async (event: React.MouseEvent): Promise<void> => {
+    presenterRef.current?.setCurrentPath(location.pathname);
     await presenterRef.current?.navigateToUser(
       authToken!,
       displayedUser!,
