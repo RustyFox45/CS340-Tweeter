@@ -6,7 +6,8 @@
       "dom.iterable",
       "esnext"
     ],
-    "types": ["vite/client", "vite-plugin-svgr/client"],
+    "types": ["vite/client", "vite-plugin-svgr/client", "jest"],
+    "typeRoots": ["./node_modules/@types", "../node_modules/@types"],
     "allowJs": true,
     "skipLibCheck": false,
     "esModuleInterop": true,
@@ -22,6 +23,7 @@
     "jsx": "react-jsx"
   },
   "include": [
-    "src"
+    "src",
+    "test"
   ]
 }

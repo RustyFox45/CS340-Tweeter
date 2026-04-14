@@ -21,6 +21,8 @@ Globals:
         FOLLOWERS_TABLE_NAME: tweeter-followers
         FEED_TABLE_NAME: tweeter-feed
         S3_BUCKET_NAME: logan-lawson-tweeter-11
+        POSTS_QUEUE_URL: !Ref PostsQueue
+        UPDATE_FEED_QUEUE_URL: !Ref UpdateFeedQueue
 
 #
 # Reusable blocks of configuration. These are referenced throughout the template to avoid duplication.
@@ -306,13 +308,20 @@ Resources:
               responses: *commonSwaggerResponses
 
   #
-  # SQS Queues  (This will become relevant in Milestone 4. For M3, leave this section commented out.)
+  # SQS Queues
   #
 
-  #   MyQueue:
-  #     Type: AWS::SQS::Queue
-  #     Properties:
-  #       QueueName: MyQueue
+  PostsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: PostsQueue
+      VisibilityTimeout: 180
+
+  UpdateFeedQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: UpdateFeedQueue
+      VisibilityTimeout: 180
 
   #
   # Lambda Layer (reused by all Lambda functions)
@@ -321,7 +330,7 @@ Resources:
     Type: AWS::Serverless::LayerVersion
     Properties:
       LayerName: tweeterLayer
-      Description: dependencies layer for Tweeter server v7
+      Description: dependencies layer for Tweeter server v8
       ContentUri: ./layer/
       CompatibleRuntimes:
         - nodejs20.x
@@ -548,21 +557,38 @@ Resources:
             Method: POST
 
   #
-  # SQS Queue Lambda Functions  (This will become relevant in Milestone 4. For M3, leave this section commented out.)
+  # SQS Queue Lambda Functions
   #
 
-  #   MyQueueFunction:
-  #     Type: AWS::Serverless::Function
-  #     Properties:
-  #       FunctionName: MyQueueFunction
-  #       Handler: <PATH TO LAMBDA HANDLER>
-  #       Policies: *commonPolicies
-  #       Events:
-  #         SQSTrigger:
-  #           Type: SQS
-  #           Properties:
-  #             Queue: !GetAtt MyQueue.Arn
-  #             Enabled: true
+  postsQueueFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: postsQueueFunction
+      Handler: lambda/status/PostsQueueLambda.handler
+      Policies: *commonPolicies
+      Timeout: 120
+      Events:
+        SQSTrigger:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt PostsQueue.Arn
+            BatchSize: 1
+            Enabled: true
+
+  updateFeedFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: updateFeedFunction
+      Handler: lambda/status/UpdateFeedLambda.handler
+      Policies: *commonPolicies
+      Timeout: 120
+      Events:
+        SQSTrigger:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt UpdateFeedQueue.Arn
+            BatchSize: 1
+            Enabled: true
 
   #
   # DynamoDB Tables

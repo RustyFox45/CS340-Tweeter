@@ -3,6 +3,7 @@ import { Post } from "../../dataAccess/Post";
 import { Service } from "./Service";
 import { DAOFactory } from "../../dataAccess/DAOFactory";
 import { AuthorizationService } from "./AuthorizationService";
+import { SQSClient, SendMessageCommand } from "@aws-sdk/client-sqs";
 
 export class StatusService implements Service {
   private storyDao = DAOFactory.getInstance().getStoryDAO();
@@ -92,17 +93,13 @@ export class StatusService implements Service {
     // add to story
     await this.storyDao.putStatus(newStatus);
 
-    // add to followers' feeds
-    const followers = await this.followDao.getAllFollowers(
-      newStatus.user.alias,
-    );
-
-    const user = User.fromDto(newStatus.user)!;
-    const statusObj = new Status(newStatus.post, user, newStatus.timestamp);
-    await this.feedDao.uploadToFollowerFeeds(
-      newStatus.user.alias,
-      followers,
-      statusObj,
+    // Send to SQS Queue 1 for async feed processing
+    const sqsClient = new SQSClient();
+    await sqsClient.send(
+      new SendMessageCommand({
+        QueueUrl: process.env.POSTS_QUEUE_URL,
+        MessageBody: JSON.stringify(newStatus),
+      }),
     );
   }
 }

@@ -5,6 +5,8 @@ import { FeedDAO } from "./FeedDAO";
 import {
   QueryCommand,
   BatchWriteCommand,
+  BatchWriteCommandInput,
+  BatchWriteCommandOutput,
   DeleteCommand,
 } from "@aws-sdk/lib-dynamodb";
 
@@ -82,16 +84,50 @@ export class DynamoFeedDAO extends DAO implements FeedDAO {
         },
       }));
 
-      const command = new BatchWriteCommand({
+      const params: BatchWriteCommandInput = {
         RequestItems: {
           [TABLE_NAME]: requestItems,
         },
-      });
+      };
 
-      await this.tryRequest(
-        () => this.getClient().send(command),
+      const resp = await this.tryRequest(
+        () => this.getClient().send(new BatchWriteCommand(params)),
         `Failed to add post to follower feeds: `,
       );
+
+      await this.putUnprocessedItems(resp, params);
+    }
+  }
+
+  private async putUnprocessedItems(
+    resp: BatchWriteCommandOutput,
+    params: BatchWriteCommandInput,
+  ): Promise<void> {
+    let delay = 10;
+    let attempts = 0;
+
+    while (
+      resp.UnprocessedItems !== undefined &&
+      Object.keys(resp.UnprocessedItems).length > 0
+    ) {
+      attempts++;
+
+      if (attempts > 1) {
+        await new Promise((resolve) => setTimeout(resolve, delay));
+
+        if (delay < 1000) {
+          delay += 100;
+        }
+      }
+
+      console.log(
+        `Attempt ${attempts}. Processing ${
+          Object.keys(resp.UnprocessedItems).length
+        } unprocessed feed items.`,
+      );
+
+      params.RequestItems = resp.UnprocessedItems;
+      resp = await this.getClient().send(new BatchWriteCommand(params));
     }
   }
 
